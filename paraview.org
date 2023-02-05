@@ -1,0 +1,49 @@
+
+
+
+
+
+
+#+begin_src python :tangle paraview-1.py
+from paraview.simple import *
+# Save a screenshot from a specific view.
+#myview = GetActiveView()
+animationScene1 = GetAnimationScene()
+tk = GetTimeKeeper()
+timesteps = tk.TimestepValues
+def export_animation(i):
+    animationScene1.AnimationTime = timesteps[i]
+    layout = GetLayout()
+    root="/home/me/python/paraview/images/aview_/"
+    fname="aview_"+'{:04d}'.format(i)+".png"
+    fname1=root+fname
+    SaveScreenshot(fname1, layout,
+                   ImageResolution=[1920, 1080])
+
+for i in range(0,len(timesteps)): export_animation(i)
+
+#+end_src
+
+
+#+begin_src shell :shebang #!/bin/sh :tangle images/aview_/paraview0.sh
+cd ~/python/paraview/images/aview_
+/usr/bin/ffmpeg -f concat -i input.txt -c:v libx264 -vf "fps=25,format=yuv420p" ./output.mp4
+#+end_src
+
+
+#+name: input
+#+begin_src shell :shebang #!/bin/sh :tangle images/aview_/input.sh :results output :file ~/python/paraview/images/aview_/input.txt
+cd ~/python/paraview/images/aview_/
+rm input.txt
+files=$(ls *.png*)
+for f in $files;do
+    echo file "$f" >> input.txt
+    echo duration 0.5 >> input.txt
+done
+/usr/bin/ffmpeg -f concat -i input.txt -c:v libx264 -vf "fps=25,format=yuv420p" ./output1.mp4
+#+end_src
+
+#+RESULTS: input
+
+
+
